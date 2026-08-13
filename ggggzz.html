@@ -1,0 +1,741 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>GMAX PLAYLIST HUB | ULTRA PRO</title>
+<style>
+  :root {
+    --primary: #00e5ff;
+    --primary-glow: rgba(0, 229, 255, 0.4);
+    --secondary: #7000ff;
+    --bg: #07090e;
+    --card-bg: rgba(18, 24, 38, 0.75);
+    --border: rgba(255, 255, 255, 0.12);
+    --text-main: #ffffff;
+    --text-muted: #a0aec0;
+    --error: #ff3b30;
+  }
+
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
+  }
+
+  html, body {
+    width: 100%;
+    height: 100%;
+    max-height: 100vh;
+    background-color: var(--bg);
+    color: var(--text-main);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(4, 6, 10, 0.88);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+    padding: 20px;
+  }
+
+  .card-modal {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    padding: 28px 22px;
+    border-radius: 24px;
+    text-align: center;
+    width: 100%;
+    max-width: 360px;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6), 0 0 30px var(--primary-glow);
+    animation: modalPop 0.3s ease-out;
+  }
+
+  @keyframes modalPop {
+    from { opacity: 0; transform: scale(0.92); }
+    to { opacity: 1; transform: scale(1); }
+  }
+
+  .profile-avatar-lg {
+    width: 86px;
+    height: 86px;
+    border-radius: 50%;
+    border: 2px solid var(--primary);
+    margin: 0 auto 14px auto;
+    object-fit: cover;
+    box-shadow: 0 0 20px var(--primary-glow);
+  }
+
+  .key-input {
+    width: 100%;
+    padding: 14px 16px;
+    background: rgba(0, 0, 0, 0.4);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    color: #fff;
+    font-size: 15px;
+    text-align: center;
+    margin: 14px 0 6px 0;
+    outline: none;
+    letter-spacing: 1px;
+    transition: 0.3s;
+  }
+
+  .key-input:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 12px var(--primary-glow);
+  }
+
+  .error-text {
+    color: var(--error);
+    font-size: 12px;
+    font-weight: 600;
+    margin-bottom: 12px;
+    display: none;
+  }
+
+  .btn-ultra {
+    background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+    color: #ffffff;
+    padding: 14px 20px;
+    border-radius: 14px;
+    border: none;
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    cursor: pointer;
+    width: 100%;
+    text-decoration: none;
+    display: inline-block;
+    box-shadow: 0 8px 20px rgba(0, 229, 255, 0.25);
+    transition: all 0.2s ease;
+  }
+
+  .btn-ultra:active {
+    transform: scale(0.98);
+  }
+
+  header {
+    height: 60px;
+    padding: 0 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: rgba(18, 24, 38, 0.85);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+  }
+
+  .brand-container {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .header-avatar {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    border: 2px solid var(--primary);
+    object-fit: cover;
+    box-shadow: 0 0 10px var(--primary-glow);
+  }
+
+  .brand-title {
+    font-weight: 900;
+    font-size: 15px;
+    letter-spacing: 1.2px;
+    background: linear-gradient(90deg, #00e5ff, #ffffff, #7000ff);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-transform: uppercase;
+  }
+
+  .badge-timer {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--primary);
+    background: rgba(0, 229, 255, 0.1);
+    padding: 6px 12px;
+    border-radius: 20px;
+    border: 1px solid rgba(0, 229, 255, 0.3);
+    box-shadow: 0 0 10px var(--primary-glow);
+  }
+
+  #content-wrapper {
+    flex: 1;
+    width: 100%;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .tab-content {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    inset: 0;
+    display: none;
+  }
+
+  .tab-content.active {
+    display: block;
+  }
+
+  /* Custom Logo Overlay */
+  #home-tab {
+    position: relative;
+  }
+
+  .iframe-logo-overlay {
+    position: absolute;
+    top: 8px;
+    left: 10px;
+    height: 48px;
+    width: 200px;
+    background: #000000;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 4px;
+    pointer-events: none;
+  }
+
+  .custom-logo {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    border: 2px solid var(--primary);
+    object-fit: cover;
+    box-shadow: 0 0 10px var(--primary-glow);
+  }
+
+  .custom-logo-text {
+    font-weight: 900;
+    font-size: 15px;
+    letter-spacing: 0.8px;
+    background: linear-gradient(90deg, #00e5ff, #ffffff);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-transform: uppercase;
+  }
+
+  /* Back Button on Iframe (Video Page) */
+  .iframe-back-btn {
+    position: absolute;
+    top: 10px;
+    right: 12px;
+    z-index: 100;
+    background: rgba(0, 0, 0, 0.85);
+    color: var(--primary);
+    border: 1px solid var(--primary);
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 0 10px var(--primary-glow);
+    backdrop-filter: blur(8px);
+  }
+
+  .iframe-back-btn:active {
+    transform: scale(0.95);
+  }
+
+  /* Video Share Mask Overlay */
+  .share-hide-overlay {
+    position: absolute;
+    bottom: 0px;
+    left: 0;
+    width: 100%;
+    height: 54px;
+    background: #07090e;
+    z-index: 95;
+    align-items: center;
+    justify-content: center;
+    padding: 6px 12px;
+    border-top: 1px solid var(--border);
+  }
+
+  .tg-mask-btn {
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, #0088cc, #00e5ff);
+    color: #ffffff;
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: 800;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    box-shadow: 0 4px 12px rgba(0, 136, 204, 0.4);
+    letter-spacing: 0.5px;
+  }
+
+  /* 1DM Floating Controls */
+  .dl-toggle-btn {
+    position: absolute;
+    bottom: 70px;
+    right: 15px;
+    z-index: 99;
+    width: 46px;
+    height: 46px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    color: #fff;
+    border: none;
+    font-size: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 15px var(--primary-glow);
+    cursor: pointer;
+  }
+
+  .dl-box {
+    position: absolute;
+    bottom: 125px;
+    right: 15px;
+    z-index: 99;
+    background: rgba(18, 24, 38, 0.95);
+    border: 1px solid var(--primary);
+    padding: 10px 14px;
+    border-radius: 12px;
+    display: none;
+    align-items: center;
+    gap: 8px;
+    backdrop-filter: blur(10px);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.8);
+  }
+
+  .btn-1dm-action {
+    background: linear-gradient(135deg, #00c6ff, #0072ff);
+    color: #fff;
+    border: none;
+    padding: 8px 14px;
+    border-radius: 8px;
+    font-weight: bold;
+    font-size: 12px;
+    cursor: pointer;
+  }
+
+  iframe {
+    width: 100%;
+    height: 100%;
+    border: none;
+    display: block;
+  }
+
+  #about-tab {
+    overflow-y: auto;
+    padding: 24px 16px 80px 16px;
+    text-align: center;
+  }
+
+  .about-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 20px;
+    margin-bottom: 16px;
+  }
+
+  .about-name {
+    font-size: 20px;
+    font-weight: 800;
+    margin-top: 8px;
+  }
+
+  .about-tag {
+    font-size: 11px;
+    color: var(--primary);
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    margin-bottom: 16px;
+  }
+
+  .quote-box {
+    background: rgba(0, 0, 0, 0.3);
+    border-left: 3px solid var(--primary);
+    padding: 12px;
+    border-radius: 8px;
+    font-size: 13px;
+    color: var(--text-muted);
+    font-style: italic;
+    margin-bottom: 16px;
+    text-align: left;
+  }
+
+  .grid-2col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 16px;
+  }
+
+  .feature-item {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--border);
+    padding: 12px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 600;
+  }
+
+  nav {
+    height: 65px;
+    background: rgba(12, 16, 26, 0.95);
+    backdrop-filter: blur(12px);
+    border-top: 1px solid var(--border);
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    flex-shrink: 0;
+  }
+
+  .nav-item {
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    font-size: 11px;
+    font-weight: 600;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    cursor: pointer;
+    width: 33.33%;
+    transition: 0.2s;
+  }
+
+  .nav-item svg {
+    width: 22px;
+    height: 22px;
+    fill: currentColor;
+  }
+
+  .nav-item.active {
+    color: var(--primary);
+    filter: drop-shadow(0 0 6px var(--primary-glow));
+  }
+</style>
+</head>
+<body>
+
+  <!-- Telegram Mandatory Popup -->
+  <div id="telegram-popup" class="overlay">
+    <div class="card-modal">
+      <img src="https://i.postimg.cc/W4CSct9p/me.jpg" class="profile-avatar-lg" alt="Gmax">
+      <h2 style="font-size: 18px; font-weight:800;">GMAX PLAYLIST HUB</h2>
+      <p style="font-size: 13px; color: var(--text-muted); margin: 10px 0 20px 0;">
+        Daily 36-Hour Access Keys और अपडेट्स के लिए टेलीग्राम ज्वाइन करें!
+      </p>
+      <a href="https://t.me/+BQmDTgTQkJU3ODA1" target="_blank" onclick="hideTelegramPopup()" class="btn-ultra">
+        JOIN TELEGRAM NOW
+      </a>
+    </div>
+  </div>
+
+  <!-- Authentication Key Modal -->
+  <div id="auth-modal" class="overlay" style="display:none;">
+    <div class="card-modal">
+      <img src="https://i.postimg.cc/W4CSct9p/me.jpg" class="profile-avatar-lg" alt="Gmax">
+      <h2 style="font-size: 18px; font-weight:800;">🔒 ACCESS REQUIRED</h2>
+      <p style="font-size: 12px; color: var(--text-muted); margin-top: 4px;">आगे बढ़ने के लिए 36 घंटे की Key डालें</p>
+      
+      <input type="text" id="pass-field" class="key-input" placeholder="Enter Key Here..." />
+      <div id="error-text" class="error-text">❌ गलत Key! Telegram से सही Key लें।</div>
+      
+      <button onclick="verifyKey()" class="btn-ultra">PASS ACTIVATE करें</button>
+    </div>
+  </div>
+
+  <!-- Header -->
+  <header>
+    <div class="brand-container">
+      <img src="https://i.postimg.cc/W4CSct9p/me.jpg" class="header-avatar" alt="Gmax Logo">
+      <div class="brand-title">GMAX PLAYLIST HUB</div>
+    </div>
+    <div id="timer-box" class="badge-timer" style="display:none;">
+      ⚡ <span id="countdown">36:00:00</span>
+    </div>
+  </header>
+
+  <!-- Main Content Area -->
+  <div id="content-wrapper">
+    <div id="home-tab" class="tab-content active">
+      <!-- Logo Masking Overlay -->
+      <div class="iframe-logo-overlay">
+        <img src="https://i.postimg.cc/W4CSct9p/me.jpg" alt="GMAX Logo" class="custom-logo">
+        <span class="custom-logo-text">GMAX PLAYLIST</span>
+      </div>
+
+      <!-- Video View Back Button (केवल वीडियो पेज पर दिखेगा) -->
+      <button id="iframe-back-btn" class="iframe-back-btn" onclick="resetToHome()" style="display: none;">
+        ◀ Back to Home
+      </button>
+
+      <!-- Video Share Buttons Covering Overlay (सिर्फ वीडियो पेज/प्ले होने पर दिखेगा) -->
+      <div id="video-share-overlay" class="share-hide-overlay" style="display: none;">
+        <a href="https://t.me/+BQmDTgTQkJU3ODA1" target="_blank" class="tg-mask-btn">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="#ffffff">
+            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69a.2.2 0 00-.05-.18c-.06-.05-.14-.03-.21-.02-.09.02-1.49.95-4.22 2.79-.4.27-.76.41-1.08.4-.36-.01-1.04-.2-1.55-.37-.63-.2-1.12-.31-1.08-.66.02-.18.27-.36.74-.55 2.92-1.27 4.86-2.11 5.83-2.51 2.78-1.16 3.35-1.36 3.73-1.36.08 0 .27.02.39.12.1.08.13.19.14.27-.01.06.01.24 0 .38z"/>
+          </svg>
+          JOIN TELEGRAM CHANNEL
+        </a>
+      </div>
+
+      <!-- Floating Download Button for Playing Movies -->
+      <button class="dl-toggle-btn" onclick="toggleDlBox()" title="Download Movie">📥</button>
+
+      <!-- Popup Download Trigger Bar -->
+      <div id="dl-box" class="dl-box">
+        <span style="font-size: 12px; color:#fff;">मूवी 1DM में खोलें:</span>
+        <button id="dl-btn" class="btn-1dm-action" onclick="openIn1DM()">Download m3u8</button>
+      </div>
+
+      <iframe id="main-frame" src="https://tmovies.watch/"></iframe>
+    </div>
+
+    <div id="about-tab" class="tab-content">
+      <div class="about-card">
+        <img src="https://i.postimg.cc/W4CSct9p/me.jpg" class="profile-avatar-lg" alt="Gmax">
+        <div class="about-name">Gmax Playlist Hub</div>
+        <div class="about-tag">DIGITAL CREATOR & DEVELOPER</div>
+        
+        <div class="quote-box">
+          👑 "न किसी से होड़ है, न किसी का डर... हम अपने ही बनाए साम्राज्य के इकलौते बादशाह हैं – Gmax1"
+        </div>
+
+        <div class="grid-2col">
+          <div class="feature-item">🔑 36H Key Pass</div>
+          <div class="feature-item">⚡ High Speed UI</div>
+          <div class="feature-item">🎬 Smooth Video Stream</div>
+          <div class="feature-item">📢 Daily Updates</div>
+        </div>
+
+        <a href="https://t.me/+BQmDTgTQkJU3ODA1" target="_blank" class="btn-ultra">JOIN TELEGRAM CHANNEL</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bottom Nav -->
+  <nav>
+    <button class="nav-item active" id="btn-home" onclick="switchTab('home')">
+      <svg viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
+      Home
+    </button>
+    <button class="nav-item" id="btn-about" onclick="switchTab('about')">
+      <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>
+      About
+    </button>
+  </nav>
+
+  <!-- JavaScript Logic -->
+  <script>
+    var _0x2a7d=["\x63\x6F\x6E\x74\x65\x78\x74\x6D\x65\x6E\x75","\x70\x72\x65\x76\x65\x6E\x74\x44\x65\x66\x61\x75\x6C\x74","\x61\x64\x64\x45\x76\x65\x6E\x74\x4C\x69\x73\x74\x65\x6E\x65\x72","\x6F\x6E\x6B\x65\x79\x64\x6F\x77\x6E","\x6B\x65\x79\x43\x6F\x64\x65","\x63\x74\x72\x6C\x4B\x65\x79","\x73\x68\x69\x66\x74\x4B\x65\x79","\x63\x68\x61\x72\x43\x6F\x64\x65\x41\x74","\x61\x63\x74\x69\x76\x65","\x74\x6F\x67\x67\x6C\x65","\x63\x6C\x61\x73\x73\x4C\x69\x73\x74","\x67\x65\x74\x45\x6C\x65\x6D\x65\x6E\x74\x42\x79\x49\x64","\x68\x6F\x6D\x65\x2D\x74\x61\x62","\x61\x62\x6F\x75\x74\x2D\x74\x61\x62","\x62\x74\x6E\x2D\x68\x6F\x6D\x65","\x62\x74\x6E\x2D\x61\x62\x6F\x75\x74","\x68\x6F\x6D\x65","\x61\x62\x6F\x75\x74","\x74\x65\x6C\x65\x67\x72\x61\x6D\x2D\x70\x6F\x70\x75\x70","\x73\x74\x79\x6C\x65","\x64\x69\x73\x70\x6C\x61\x79","\x6E\x6F\x6E\x65","\x67\x6D\x61\x78\x5F\x65\x78\x70\x69\x72\x79","\x67\x65\x74\x49\x74\x65\x6D","\x6C\x6F\x63\x61\x6C\x53\x74\x6F\x72\x61\x67\x65","\x67\x65\x74\x54\x69\x6D\x65","\x61\x75\x74\x68\x2D\x6D\x6F\x64\x61\x6C","\x66\x6C\x65\x78","\x74\x69\x6D\x65\x72\x2D\x62\x6F\x78","\x62\x6C\x6F\x63\x6B","\x72\x65\x6D\x6F\x76\x65\x49\x74\x65\x6D","\x72\x65\x6C\x6F\x61\x64","\x6C\x6F\x63\x61\x74\x69\x6F\x6E","\x63\x6F\x75\x6E\x74\x64\x6F\x77\x6E","\x69\x6E\x6E\x65\x72\x54\x65\x78\x74","\x68\x20","\x6D\x20","\x73","\x70\x61\x73\x73\x2D\x66\x69\x65\x6C\x64","\x76\x61\x6C\x75\x65","\x74\x72\x69\x6D","\x47\x54\x52\x4D\x46","\x67\x65\x74\x46\x75\x6C\x6C\x59\x65\x61\x72","\x67\x65\x74\x4D\x6F\x6E\x74\x68","\x67\x65\x74\x44\x61\x74\x65","\x73\x65\x74\x49\x74\x65\x6D","\x65\x72\x72\x6F\x72\x2D\x74\x65\x78\x74"];
+    
+    document[_0x2a7d[2]](_0x2a7d[0], function(e){e[_0x2a7d[1]]();});
+    document[_0x2a7d[3]] = function(e){
+      if(e[_0x2a7d[4]] == 123 || (e[_0x2a7d[5]] && e[_0x2a7d[6]] && (e[_0x2a7d[4]] == _0x2a7d[7][_0x2a7d[7]](0) || e[_0x2a7d[4]] == _0x2a7d[8][_0x2a7d[7]](0) || e[_0x2a7d[4]] == _0x2a7d[9][_0x2a7d[7]](0))) || (e[_0x2a7d[5]] && e[_0x2a7d[4]] == _0x2a7d[10][_0x2a7d[7]](0))){
+        return false;
+      }
+    };
+
+    function resetToHome() {
+      var iframe = document.getElementById('main-frame');
+      var backBtn = document.getElementById('iframe-back-btn');
+      var overlay = document.getElementById('video-share-overlay');
+
+      if (iframe) {
+        iframe.src = "https://tmovies.watch/";
+      }
+      if (backBtn) backBtn.style.display = 'none';
+      if (overlay) overlay.style.display = 'none';
+    }
+
+    function switchTab(tab){
+      document[_0x2a7d[11]](_0x2a7d[12])[_0x2a7d[10]][_0x2a7d[9]](_0x2a7d[8],tab===_0x2a7d[16]);
+      document[_0x2a7d[11]](_0x2a7d[13])[_0x2a7d[10]][_0x2a7d[9]](_0x2a7d[8],tab===_0x2a7d[17]);
+      document[_0x2a7d[11]](_0x2a7d[14])[_0x2a7d[10]][_0x2a7d[9]](_0x2a7d[8],tab===_0x2a7d[16]);
+      document[_0x2a7d[11]](_0x2a7d[15])[_0x2a7d[10]][_0x2a7d[9]](_0x2a7d[8],tab===_0x2a7d[17]);
+
+      if (tab === 'home') {
+        resetToHome();
+      }
+    }
+
+    function hideTelegramPopup(){
+      document[_0x2a7d[11]](_0x2a7d[18])[_0x2a7d[19]][_0x2a7d[20]]=_0x2a7d[21];
+      checkAccess();
+    }
+
+    function checkAccess(){
+      var exp=window[_0x2a7d[24]][_0x2a7d[23]](_0x2a7d[22]);
+      var now=new Date()[_0x2a7d[25]]();
+      if(!exp||now>parseInt(exp)){
+        document[_0x2a7d[11]](_0x2a7d[26])[_0x2a7d[19]][_0x2a7d[20]]=_0x2a7d[27];
+        document[_0x2a7d[11]](_0x2a7d[28])[_0x2a7d[19]][_0x2a7d[20]]=_0x2a7d[21];
+      }else{
+        document[_0x2a7d[11]](_0x2a7d[26])[_0x2a7d[19]][_0x2a7d[20]]=_0x2a7d[21];
+        document[_0x2a7d[11]](_0x2a7d[28])[_0x2a7d[19]][_0x2a7d[20]]=_0x2a7d[29];
+        startCountdown(parseInt(exp));
+      }
+    }
+
+    function startCountdown(expTime){
+      var timer=setInterval(function(){
+        var rem=expTime- new Date()[_0x2a7d[25]]();
+        if(rem<=0){
+          clearInterval(timer);
+          window[_0x2a7d[24]][_0x2a7d[30]](_0x2a7d[22]);
+          window[_0x2a7d[32]][_0x2a7d[31]]();
+          return;
+        }
+        var h=Math.floor(rem/(1000*60*60));
+        var m=Math.floor((rem%(1000*60*60))/(1000*60));
+        var s=Math.floor((rem%(1000*60))/1000);
+        document[_0x2a7d[11]](_0x2a7d[33])[_0x2a7d[34]]=h+_0x2a7d[35]+m+_0x2a7d[36]+s+_0x2a7d[37];
+      },1000);
+    }
+
+    function generateTodayKey(){
+      var baseStr = "GTRMF";
+      var startDate = new Date(2026, 7, 11);
+      var today = new Date();
+      
+      var diffTime = today - startDate;
+      var diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+      if(diffDays < 0) diffDays = 0;
+
+      var shiftedPrefix = "";
+      for(var i=0; i<baseStr.length; i++){
+        var code = baseStr.charCodeAt(i);
+        var newCode = ((code - 65 + diffDays) % 26) + 65;
+        shiftedPrefix += String.fromCharCode(newCode);
+      }
+
+      var yr = today.getFullYear();
+      var m = String(today.getMonth() + 1);
+      var lastM = m.slice(-1);
+      var d = String(today.getDate());
+      var lastD = d.slice(-1);
+
+      return shiftedPrefix + ":" + yr + lastM + lastD;
+    }
+
+    function verifyKey(){
+      var inputKey=document[_0x2a7d[11]](_0x2a7d[38])[_0x2a7d[39]][_0x2a7d[40]]();
+      var correctKey = generateTodayKey();
+
+      if(inputKey === correctKey){
+        var audio = new Audio('https://cdn.imageurlgenerator.com/uploads/25862de2-bf3a-486a-be02-ed7140121d2b.mp3');
+        audio.play().catch(function(e){ console.log("Audio Error:", e); });
+
+        var exp=new Date()[_0x2a7d[25]]()+(36*60*60*1000);
+        window[_0x2a7d[24]][_0x2a7d[45]](_0x2a7d[22],exp);
+        document[_0x2a7d[11]](_0x2a7d[46])[_0x2a7d[19]][_0x2a7d[20]]=_0x2a7d[21];
+        checkAccess();
+      }else{
+        document[_0x2a7d[11]](_0x2a7d[46])[_0x2a7d[19]][_0x2a7d[20]]=_0x2a7d[29];
+      }
+    }
+
+    /* Video Playing Auto-Detect Logic */
+    function checkVideoPlaying() {
+      var iframe = document.getElementById('main-frame');
+      var overlay = document.getElementById('video-share-overlay');
+      var backBtn = document.getElementById('iframe-back-btn');
+      
+      if (!iframe) return;
+
+      try {
+        var currentUrl = iframe.contentWindow.location.href;
+        if (currentUrl.includes('/watch') || currentUrl.includes('/movie') || currentUrl.includes('play')) {
+          if (overlay) overlay.style.display = 'flex';
+          if (backBtn) backBtn.style.display = 'block';
+        } else {
+          if (overlay) overlay.style.display = 'none';
+          if (backBtn) backBtn.style.display = 'none';
+        }
+      } catch (e) {
+        window.addEventListener('blur', function() {
+          if (document.activeElement === iframe) {
+            if (overlay) overlay.style.display = 'flex';
+            if (backBtn) backBtn.style.display = 'block';
+          }
+        });
+      }
+    }
+    setInterval(checkVideoPlaying, 2000);
+
+    /* 1DM Controls & Custom API Integration */
+    function toggleDlBox() {
+      var box = document.getElementById('dl-box');
+      if (box.style.display === 'flex') {
+        box.style.display = 'none';
+      } else {
+        box.style.display = 'flex';
+      }
+    }
+
+    async function openIn1DM() {
+      var iframe = document.getElementById('main-frame');
+      var dlBtn = document.getElementById('dl-btn');
+      var targetUrl = "";
+
+      try {
+        targetUrl = iframe.contentWindow.location.href;
+      } catch (e) {
+        targetUrl = iframe.src;
+      }
+
+      dlBtn.innerText = "Extracting...";
+      dlBtn.disabled = true;
+
+      const apiEndpoint = `https://gmaxapi-production.up.railway.app/api?url=${encodeURIComponent(targetUrl)}`;
+
+      try {
+        const response = await fetch(apiEndpoint);
+        const data = await response.json();
+
+        const extractedM3u = data.m3u8 || data.m3u || data.stream_url || data.url || data.mp4;
+
+        if (extractedM3u) {
+          var encodedM3u = encodeURIComponent(extractedM3u);
+          var intentUrl = "intent:" + extractedM3u + 
+                          "#Intent;" +
+                          "action=android.intent.action.VIEW;" +
+                          "package=idm.internet.download.manager;" +
+                          "S.android.intent.extra.TEXT=" + encodedM3u + ";" +
+                          "end";
+
+          window.location.href = intentUrl;
+        } else {
+          alert('API से M3U Link नहीं मिल पाया!');
+        }
+      } catch (err) {
+        console.error("API Error:", err);
+        alert('API कनेक्टिविटी में समस्या आई!');
+      } finally {
+        dlBtn.innerText = "Download m3u8";
+        dlBtn.disabled = false;
+      }
+    }
+  </script>
+</body>
+</html>
