@@ -1,0 +1,1440 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Gmax Playlist Hub</title>
+    
+    <!-- External Manifest Link -->
+    <link rel="manifest" href="./manifest.json">
+    <meta name="theme-color" content="#0a0e1a">
+    <link rel="apple-touch-icon" href="https://i.postimg.cc/YCtvjdWV/me.jpg">
+
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Roboto, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body, html {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background: linear-gradient(135deg, #0a0e1a 0%, #0d1324 40%, #0a1628 100%);
+            color: #ffffff;
+        }
+
+        /* Soft floating background glow */
+        body::before {
+            content: '';
+            position: fixed;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: 
+                radial-gradient(circle at 20% 30%, rgba(0, 212, 255, 0.09) 0%, transparent 42%),
+                radial-gradient(circle at 80% 70%, rgba(255, 45, 117, 0.07) 0%, transparent 42%);
+            z-index: -1;
+            animation: bgFloat 22s ease-in-out infinite alternate;
+        }
+
+        @keyframes bgFloat {
+            0% { transform: translate(0, 0) scale(1); }
+            100% { transform: translate(-2.5%, 1.8%) scale(1.03); }
+        }
+
+        /* ========== HEADER ========== */
+        header {
+            height: 62px;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.06);
+            backdrop-filter: blur(28px) saturate(180%);
+            -webkit-backdrop-filter: blur(28px) saturate(180%);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 16px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+            position: relative;
+            z-index: 100;
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.25);
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 11px;
+        }
+
+        .logo-img {
+            width: 38px;
+            height: 38px;
+            border-radius: 12px;
+            object-fit: cover;
+            border: 1.5px solid rgba(0, 212, 255, 0.55);
+            box-shadow: 
+                0 0 12px rgba(0, 212, 255, 0.4),
+                0 0 28px rgba(0, 212, 255, 0.18);
+            transition: box-shadow 0.4s ease;
+        }
+
+        .logo-text {
+            font-size: 1.15rem;
+            font-weight: 800;
+            background: linear-gradient(90deg, #00d4ff, #ff2d75);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: 0.3px;
+            filter: drop-shadow(0 0 8px rgba(0, 212, 255, 0.3));
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .header-badge {
+            background: rgba(0, 136, 204, 0.18);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(0, 170, 255, 0.4);
+            color: #5ec8ff;
+            padding: 7px 14px;
+            border-radius: 50px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            text-decoration: none;
+            transition: all 0.35s cubic-bezier(0.25, 0.8, 0.25, 1);
+            box-shadow: 0 4px 18px rgba(0, 136, 204, 0.22);
+        }
+
+        .header-badge:active {
+            transform: scale(0.95);
+            background: rgba(0, 136, 204, 0.3);
+            box-shadow: 0 2px 12px rgba(0, 136, 204, 0.35);
+        }
+
+        .install-btn {
+            background: linear-gradient(90deg, #00d4ff, #0088cc);
+            border: 1px solid rgba(0, 212, 255, 0.5);
+            color: #ffffff;
+            padding: 7px 12px;
+            border-radius: 50px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            display: none;
+            align-items: center;
+            gap: 6px;
+            cursor: pointer;
+            transition: all 0.35s ease;
+            box-shadow: 0 0 15px rgba(0, 212, 255, 0.3);
+        }
+
+        .install-btn:active {
+            transform: scale(0.95);
+        }
+
+        /* ========== CONTENT ========== */
+        .content-container {
+            width: 100%;
+            height: calc(100vh - 122px - env(safe-area-inset-bottom, 0px));
+            position: relative;
+        }
+
+        .tab-content {
+            display: none;
+            width: 100%;
+            height: 100%;
+            position: relative;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        #homeTab iframe {
+            width: 100%;
+            height: calc(100% + 22px);
+            border: none;
+            background: #ffffff;
+            position: relative;
+            top: -22px;
+            margin-bottom: -22px;
+        }
+
+        /* Custom White Strip Overlay for Logo + GMAX AI - full cover, no gap below */
+        .search-logo-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 54px;
+            width: 100%;
+            z-index: 99;
+            pointer-events: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: #ffffff;
+            padding: 0 12px;
+            border-radius: 0;
+            box-shadow: none;
+            overflow: hidden;
+        }
+
+        .search-logo-overlay img {
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            object-fit: cover;
+            flex-shrink: 0;
+        }
+
+        .search-logo-overlay .brand-title {
+            color: #1a1a1a;
+            font-size: 1.05rem;
+            font-weight: 700;
+            letter-spacing: 0.2px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        /* WhatsApp floating button - over Delete (trash) icon */
+        .wifi-share-overlay-btn {
+            position: absolute;
+            top: 6px;
+            right: 8px;
+            width: 42px;
+            height: 42px;
+            background: rgba(13, 40, 28, 0.65);
+            backdrop-filter: blur(16px) saturate(160%);
+            -webkit-backdrop-filter: blur(16px) saturate(160%);
+            border: 1.5px solid rgba(37, 211, 102, 0.5);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #25D366;
+            font-size: 1.15rem;
+            cursor: pointer;
+            z-index: 9999;
+            box-shadow: 
+                0 4px 20px rgba(37, 211, 102, 0.3),
+                0 0 18px rgba(37, 211, 102, 0.2);
+            transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+            opacity: 0;
+            transform: scale(0.35);
+            pointer-events: none;
+        }
+
+        .wifi-share-overlay-btn.show {
+            opacity: 1;
+            transform: scale(1);
+            pointer-events: auto;
+            animation: pulseGlow 2.8s ease-in-out infinite;
+        }
+
+        @keyframes pulseGlow {
+            0%, 100% { 
+                box-shadow: 
+                    0 4px 20px rgba(37, 211, 102, 0.3),
+                    0 0 0 0 rgba(37, 211, 102, 0.45);
+            }
+            50% { 
+                box-shadow: 
+                    0 4px 25px rgba(37, 211, 102, 0.4),
+                    0 0 0 10px rgba(37, 211, 102, 0);
+            }
+        }
+
+        .wifi-share-overlay-btn:active {
+            transform: scale(0.88);
+            transition: transform 0.15s ease;
+        }
+
+        /* ========== SHARE OVERLAY ========== */
+        .share-overlay {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(6, 9, 19, 0.72);
+            backdrop-filter: blur(18px);
+            -webkit-backdrop-filter: blur(18px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 200;
+            padding: 24px;
+        }
+
+        .share-card {
+            background: rgba(255, 255, 255, 0.07);
+            backdrop-filter: blur(32px) saturate(180%);
+            -webkit-backdrop-filter: blur(32px) saturate(180%);
+            border-radius: 28px;
+            padding: 36px 28px;
+            max-width: 400px;
+            width: 100%;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.14);
+            box-shadow: 
+                0 25px 50px -12px rgba(0, 0, 0, 0.55),
+                inset 0 1px 0 rgba(255, 255, 255, 0.12),
+                0 0 40px rgba(37, 211, 102, 0.08);
+            animation: cardAppear 0.55s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+
+        @keyframes cardAppear {
+            from {
+                opacity: 0;
+                transform: scale(0.92) translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
+        }
+
+        .share-icon {
+            font-size: 3.2rem;
+            color: #25D366;
+            margin-bottom: 18px;
+            filter: drop-shadow(0 0 14px rgba(37, 211, 102, 0.55));
+            animation: iconFloat 3.5s ease-in-out infinite;
+        }
+
+        @keyframes iconFloat {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-6px); }
+        }
+
+        .share-card h2 {
+            font-size: 1.45rem;
+            font-weight: 800;
+            margin-bottom: 10px;
+            letter-spacing: -0.3px;
+        }
+
+        .share-card p {
+            font-size: 0.95rem;
+            color: rgba(255, 255, 255, 0.72);
+            margin-bottom: 26px;
+            line-height: 1.55;
+        }
+
+        .progress-container {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 50px;
+            height: 14px;
+            overflow: hidden;
+            margin-bottom: 14px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .green-progress-bar {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, #25D366, #128C7E);
+            border-radius: 50px;
+            transition: width 0.9s cubic-bezier(0.22, 1, 0.36, 1);
+            box-shadow: 
+                0 0 12px rgba(37, 211, 102, 0.7),
+                0 0 24px rgba(37, 211, 102, 0.3);
+        }
+
+        .progress-text {
+            font-size: 0.88rem;
+            font-weight: 700;
+            color: #25D366;
+            margin-bottom: 24px;
+            letter-spacing: 0.2px;
+            text-shadow: 0 0 12px rgba(37, 211, 102, 0.4);
+        }
+
+        .whatsapp-share-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(135deg, #25D366 0%, #128C7E 100%);
+            color: #ffffff;
+            border: none;
+            border-radius: 18px;
+            font-size: 1.05rem;
+            font-weight: 700;
+            cursor: pointer;
+            box-shadow: 
+                0 8px 25px rgba(37, 211, 102, 0.4),
+                0 0 20px rgba(37, 211, 102, 0.2);
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+        }
+
+        .whatsapp-share-btn:active {
+            transform: scale(0.96);
+            box-shadow: 
+                0 4px 15px rgba(37, 211, 102, 0.35),
+                0 0 15px rgba(37, 211, 102, 0.15);
+        }
+
+        .whatsapp-share-btn:disabled {
+            background: rgba(255, 255, 255, 0.12);
+            color: rgba(255, 255, 255, 0.4);
+            box-shadow: none;
+            cursor: not-allowed;
+        }
+
+        /* ========== TELEGRAM POPUP ========== */
+        .tg-popup-overlay {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.65);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            padding: 24px;
+        }
+
+        .tg-popup-card {
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(36px) saturate(180%);
+            -webkit-backdrop-filter: blur(36px) saturate(180%);
+            border-radius: 28px;
+            padding: 36px 28px;
+            max-width: 370px;
+            width: 100%;
+            text-align: center;
+            border: 1px solid rgba(0, 170, 255, 0.28);
+            box-shadow: 
+                0 25px 50px -12px rgba(0, 0, 0, 0.6),
+                0 0 50px rgba(0, 136, 204, 0.18),
+                inset 0 1px 0 rgba(255, 255, 255, 0.12);
+            animation: cardAppear 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+            position: relative;
+        }
+
+        .tg-popup-close, .install-popup-close {
+            position: absolute;
+            top: 10px; right: 10px;
+            width: 44px;
+            height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.9rem;
+            color: rgba(255, 255, 255, 0.85);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            line-height: 1;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.12);
+            z-index: 20;
+            pointer-events: auto;
+            -webkit-tap-highlight-color: transparent;
+            border: none;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        .tg-popup-close:active, .install-popup-close:active {
+            color: #fff;
+            background: rgba(255,255,255,0.2);
+            transform: scale(0.9);
+        }
+
+        .tg-icon-large {
+            font-size: 3.6rem;
+            color: #0088cc;
+            margin-bottom: 16px;
+            filter: drop-shadow(0 0 18px rgba(0, 136, 204, 0.55));
+            animation: iconFloat 3.8s ease-in-out infinite;
+        }
+
+        .tg-popup-card h3 {
+            font-size: 1.4rem;
+            font-weight: 800;
+            margin-bottom: 10px;
+        }
+
+        .tg-popup-card p {
+            font-size: 0.95rem;
+            color: rgba(255, 255, 255, 0.7);
+            margin-bottom: 26px;
+            line-height: 1.5;
+        }
+
+        .tg-join-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(135deg, #0088cc 0%, #00a2f3 100%);
+            color: #ffffff;
+            text-decoration: none;
+            border-radius: 18px;
+            font-size: 1.05rem;
+            font-weight: 700;
+            box-shadow: 
+                0 8px 25px rgba(0, 136, 204, 0.45),
+                0 0 22px rgba(0, 136, 204, 0.25);
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+        }
+
+        .tg-join-btn:active {
+            transform: scale(0.96);
+            box-shadow: 
+                0 4px 15px rgba(0, 136, 204, 0.35),
+                0 0 15px rgba(0, 136, 204, 0.2);
+        }
+
+        /* ========== ABOUT TAB ========== */
+        #aboutTab {
+            overflow-y: auto;
+            padding: 28px 18px 90px 18px;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .about-card {
+            background: rgba(255, 255, 255, 0.07);
+            backdrop-filter: blur(32px) saturate(180%);
+            -webkit-backdrop-filter: blur(32px) saturate(180%);
+            border-radius: 28px;
+            padding: 36px 24px;
+            max-width: 460px;
+            width: 100%;
+            border: 1px solid rgba(255, 255, 255, 0.13);
+            box-shadow: 
+                0 25px 50px -12px rgba(0, 0, 0, 0.5),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1),
+                0 0 40px rgba(0, 212, 255, 0.06);
+            animation: cardAppear 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+            text-align: center;
+        }
+
+        .about-avatar-container {
+            position: relative;
+            width: 110px;
+            height: 110px;
+            margin: 0 auto 20px auto;
+        }
+
+        .about-avatar {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid rgba(0, 212, 255, 0.55);
+            box-shadow: 
+                0 0 25px rgba(0, 212, 255, 0.4),
+                0 0 50px rgba(0, 212, 255, 0.15);
+            transition: box-shadow 0.4s ease;
+        }
+
+        .about-card h2 {
+            font-size: 1.5rem;
+            font-weight: 800;
+            margin-bottom: 6px;
+            background: linear-gradient(90deg, #00d4ff, #ff2d75);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            filter: drop-shadow(0 0 10px rgba(0, 212, 255, 0.25));
+        }
+
+        .about-role {
+            color: #5ec8ff;
+            font-size: 0.9rem;
+            font-weight: 700;
+            margin-bottom: 22px;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            text-shadow: 0 0 12px rgba(0, 170, 255, 0.3);
+        }
+
+        .about-bio {
+            color: rgba(255, 255, 255, 0.85);
+            font-size: 0.98rem;
+            font-weight: 500;
+            line-height: 1.65;
+            margin-bottom: 28px;
+            background: rgba(255, 255, 255, 0.05);
+            padding: 20px;
+            border-radius: 18px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .social-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            width: 100%;
+            padding: 16px;
+            border-radius: 18px;
+            font-size: 1.05rem;
+            font-weight: 700;
+            text-decoration: none;
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+        }
+
+        .social-btn.telegram {
+            background: linear-gradient(135deg, #0088cc 0%, #00a2f3 100%);
+            color: #ffffff;
+            box-shadow: 
+                0 8px 25px rgba(0, 136, 204, 0.4),
+                0 0 20px rgba(0, 136, 204, 0.2);
+        }
+
+        .social-btn.telegram:active {
+            transform: scale(0.96);
+            box-shadow: 
+                0 4px 15px rgba(0, 136, 204, 0.3),
+                0 0 12px rgba(0, 136, 204, 0.15);
+        }
+
+        /* ========== BOTTOM NAV ========== */
+        .bottom-nav {
+            height: 60px;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.06);
+            backdrop-filter: blur(28px) saturate(180%);
+            -webkit-backdrop-filter: blur(28px) saturate(180%);
+            border-top: 1px solid rgba(255, 255, 255, 0.12);
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            position: fixed;
+            bottom: 0; left: 0;
+            z-index: 100;
+            box-shadow: 0 -4px 30px rgba(0, 0, 0, 0.25);
+            padding-bottom: env(safe-area-inset-bottom);
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+            color: rgba(255, 255, 255, 0.45);
+            cursor: pointer;
+            font-size: 0.72rem;
+            font-weight: 600;
+            width: 50%;
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            padding: 6px 0;
+        }
+
+        .nav-item i {
+            font-size: 1.25rem;
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+        }
+
+        .nav-item.active {
+            color: #00d4ff;
+        }
+
+        .nav-item.active i {
+            transform: scale(1.15);
+            filter: drop-shadow(0 0 10px rgba(0, 212, 255, 0.7));
+        }
+
+        /* ========== INSTALL APP POPUP ========== */
+        .install-popup-overlay {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+            padding: 24px;
+        }
+
+        .install-popup-overlay.show {
+            display: flex;
+        }
+
+        .install-popup-card {
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(36px) saturate(180%);
+            -webkit-backdrop-filter: blur(36px) saturate(180%);
+            border-radius: 28px;
+            padding: 36px 28px;
+            max-width: 370px;
+            width: 100%;
+            text-align: center;
+            border: 1px solid rgba(0, 212, 255, 0.35);
+            box-shadow: 
+                0 25px 50px -12px rgba(0, 0, 0, 0.6),
+                0 0 50px rgba(0, 212, 255, 0.18),
+                inset 0 1px 0 rgba(255, 255, 255, 0.12);
+            animation: cardAppear 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+            position: relative;
+        }
+
+        .install-icon-large {
+            font-size: 3.4rem;
+            background: linear-gradient(135deg, #00d4ff, #ff2d75);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 16px;
+            filter: drop-shadow(0 0 18px rgba(0, 212, 255, 0.45));
+            animation: iconFloat 3.8s ease-in-out infinite;
+        }
+
+        .install-popup-card h3 {
+            font-size: 1.4rem;
+            font-weight: 800;
+            margin-bottom: 10px;
+        }
+
+        .install-popup-card p {
+            font-size: 0.95rem;
+            color: rgba(255, 255, 255, 0.7);
+            margin-bottom: 22px;
+            line-height: 1.5;
+        }
+
+        .install-now-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(135deg, #00d4ff 0%, #0088cc 100%);
+            color: #ffffff;
+            border: none;
+            border-radius: 18px;
+            font-size: 1.05rem;
+            font-weight: 700;
+            cursor: pointer;
+            box-shadow: 
+                0 8px 25px rgba(0, 212, 255, 0.45),
+                0 0 22px rgba(0, 212, 255, 0.25);
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            margin-bottom: 12px;
+        }
+
+        .install-now-btn:active {
+            transform: scale(0.96);
+            box-shadow: 
+                0 4px 15px rgba(0, 212, 255, 0.35),
+                0 0 15px rgba(0, 212, 255, 0.2);
+        }
+
+        .install-later-btn {
+            background: transparent;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: rgba(255, 255, 255, 0.7);
+            padding: 12px;
+            border-radius: 14px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            width: 100%;
+            cursor: pointer;
+            transition: all 0.25s ease;
+        }
+
+        .install-later-btn:active {
+            background: rgba(255, 255, 255, 0.08);
+            color: #fff;
+        }
+
+        .ios-install-steps {
+            display: none;
+            text-align: left;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 16px;
+            padding: 16px;
+            margin-top: 12px;
+            font-size: 0.88rem;
+            color: rgba(255, 255, 255, 0.8);
+            line-height: 1.6;
+        }
+
+        .ios-install-steps.show {
+            display: block;
+        }
+
+        .ios-install-steps ol {
+            padding-left: 18px;
+            margin: 0;
+        }
+
+        .ios-install-steps li {
+            margin-bottom: 6px;
+        }
+
+        /* ========== PASSWORD UNLOCK (36h rolling key) ========== */
+        .pw-input {
+            width: 100%;
+            padding: 14px 16px;
+            border-radius: 14px;
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            background: rgba(255, 255, 255, 0.08);
+            color: #fff;
+            font-size: 1.15rem;
+            font-weight: 700;
+            letter-spacing: 3px;
+            text-align: center;
+            outline: none;
+            margin-bottom: 10px;
+        }
+        .pw-input::placeholder {
+            letter-spacing: 0.5px;
+            font-weight: 500;
+            color: rgba(255,255,255,0.4);
+            font-size: 0.95rem;
+        }
+        .pw-input:focus {
+            border-color: rgba(0, 212, 255, 0.55);
+            box-shadow: 0 0 0 3px rgba(0, 212, 255, 0.15);
+        }
+        .pw-err {
+            min-height: 20px;
+            font-size: 0.85rem;
+            color: #ff6b8a;
+            margin-bottom: 12px;
+            font-weight: 600;
+        }
+        .pw-row {
+            display: flex;
+            gap: 10px;
+            width: 100%;
+        }
+        .pw-row .btn-ghost, .pw-row .btn-primary {
+            flex: 1;
+            padding: 14px 12px;
+            border-radius: 16px;
+            font-size: 0.95rem;
+            font-weight: 700;
+            border: none;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            transition: all 0.25s ease;
+        }
+        .pw-row .btn-ghost {
+            background: rgba(255,255,255,0.1);
+            color: #fff;
+            border: 1px solid rgba(255,255,255,0.18);
+        }
+        .pw-row .btn-primary {
+            background: linear-gradient(135deg, #00d4ff 0%, #0088cc 100%);
+            color: #fff;
+            box-shadow: 0 6px 20px rgba(0, 212, 255, 0.35);
+        }
+        .pw-row .btn-ghost:active, .pw-row .btn-primary:active {
+            transform: scale(0.96);
+        }
+        .pw-row button:disabled {
+            opacity: 0.55;
+            cursor: not-allowed;
+        }
+        .unlock-sub {
+            font-size: 0.9rem;
+            color: rgba(255,255,255,0.72);
+            margin-bottom: 18px;
+            line-height: 1.55;
+        }
+        .timer-chip {
+            display: none;
+            align-items: center;
+            gap: 6px;
+            background: rgba(0, 212, 255, 0.15);
+            border: 1px solid rgba(0, 212, 255, 0.4);
+            color: #5ec8ff;
+            padding: 6px 12px;
+            border-radius: 50px;
+            font-size: 0.78rem;
+            font-weight: 700;
+            margin-left: 8px;
+        }
+        .timer-chip.show {
+            display: inline-flex;
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="tg-popup-overlay" id="tgPopupModal" onclick="if(event.target===this)closeTgPopup()">
+        <div class="tg-popup-card" onclick="event.stopPropagation()">
+            <span class="tg-popup-close" role="button" aria-label="Close" onclick="closeTgPopup(); return false;">&times;</span>
+            <i class="fa-brands fa-telegram tg-icon-large"></i>
+            <h3>Join Telegram Channel</h3>
+            <p>नए गानों की प्लेलिस्ट और अपडेट्स के लिए हमारे टेलीग्राम चैनल से जुड़ें!</p>
+            <a href="https://t.me/+BQmDTgTQkJU3ODA1" target="_blank" class="tg-join-btn" onclick="closeTgPopup()">
+                <i class="fa-brands fa-telegram"></i> Join Telegram Now
+            </a>
+        </div>
+    </div>
+
+    <!-- Install App Popup -->
+    <div class="install-popup-overlay" id="installPopupModal" onclick="if(event.target===this)closeInstallPopup()">
+        <div class="install-popup-card" onclick="event.stopPropagation()">
+            <span class="install-popup-close" role="button" aria-label="Close" onclick="closeInstallPopup(); return false;">&times;</span>
+            <i class="fa-solid fa-mobile-screen-button install-icon-large"></i>
+            <h3>App Install करें</h3>
+            <p>Gmax Playlist Hub को अपने फोन पर ऐप की तरह इंस्टॉल करें — फास्ट, ऑफलाइन-ready और होम स्क्रीन पर!</p>
+            <button class="install-now-btn" id="installNowBtn" onclick="triggerInstall()">
+                <i class="fa-solid fa-download"></i> Install App Now
+            </button>
+            <button class="install-later-btn" onclick="closeInstallPopup()">बाद में</button>
+            <div class="ios-install-steps" id="iosInstallSteps">
+                <strong>iPhone पर इंस्टॉल:</strong>
+                <ol>
+                    <li>Safari में नीचे <b>Share</b> बटन दबाएं</li>
+                    <li><b>Add to Home Screen</b> चुनें</li>
+                    <li>Add दबाकर इंस्टॉल करें</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+
+    <header>
+        <div class="logo-container">
+            <img src="https://i.postimg.cc/YCtvjdWV/me.jpg" alt="Gmax Logo" class="logo-img">
+            <span class="logo-text">Gmax Hub</span>
+            <span class="timer-chip" id="timerChip">⏱ <span id="timerVal">36:00:00</span></span>
+        </div>
+        
+        <div class="header-actions">
+            <button id="pwaInstallBtn" class="install-btn">
+                <i class="fa-solid fa-download"></i> <span>Install App</span>
+            </button>
+
+            <a href="https://t.me/+BQmDTgTQkJU3ODA1" target="_blank" class="header-badge">
+                <i class="fa-brands fa-telegram"></i> <span>Telegram</span>
+            </a>
+        </div>
+    </header>
+
+    <div class="content-container">
+        
+        <div id="homeTab" class="tab-content active">
+            <!-- White strip overlay with Logo and GMAX AI Text -->
+            <div class="search-logo-overlay" id="logoOverlay">
+                <img src="https://i.postimg.cc/prCsgYtQ/me-(1).png" alt="Custom Logo">
+                <span class="brand-title">GMAX AI</span>
+            </div>
+
+            <button class="wifi-share-overlay-btn" id="wifiShareBtn" onclick="triggerDirectWhatsAppShare()" title="Share on WhatsApp">
+                <i class="fa-brands fa-whatsapp"></i>
+            </button>
+
+            <div class="share-overlay" id="shareOverlay">
+                <div class="share-card">
+                    <i class="fa-solid fa-lock share-icon" style="color:#00d4ff;filter:drop-shadow(0 0 14px rgba(0,212,255,0.55));"></i>
+                    <h2>Unlock All AI Tools</h2>
+                    <p class="unlock-sub">1) <b>Get Key</b> दबाएँ → AroLinks लिंक पूरा करें → 12-digit कोड कॉपी करें<br/>2) नीचे पेस्ट करके <b>Verify</b> करें · वैध <b>36 घंटे</b><br/>सभी AI Tools अनलॉक हो जाएँगे</p>
+                    
+                    <input id="pwInput" class="pw-input" type="text" inputmode="numeric" maxlength="12" placeholder="12-digit code" autocomplete="one-time-code"/>
+                    <div class="pw-err" id="pwErr"></div>
+                    <div class="pw-row">
+                        <button class="btn-ghost" type="button" id="pwGetKeyBtn">🔑 Get Key</button>
+                        <button class="btn-primary" type="button" id="pwSubmit">Verify</button>
+                    </div>
+                </div>
+            </div>
+
+            <iframe 
+                id="musicPlayerIframe"
+                title="Music Player"
+                allow="autoplay *; clipboard-write; encrypted-media; picture-in-picture">
+            </iframe>
+        </div>
+
+        <div id="aboutTab" class="tab-content">
+            <div class="about-card">
+                <div class="about-avatar-container">
+                    <img src="https://i.postimg.cc/YCtvjdWV/me.jpg" alt="Gmax Profile" class="about-avatar">
+                </div>
+                <h2>Gmax Playlist Hub</h2>
+                <div class="about-role">Founder & Digital Creator</div>
+                
+                <div class="about-bio">
+                    👑 *"न किसी से होड़ है, न किसी का डर... हम अपने ही बनाए साम्राज्य के इकलौते बादशाह हैं — Gmax।"*
+                </div>
+
+                <div class="social-links-grid">
+                    <a href="https://t.me/+BQmDTgTQkJU3ODA1" target="_blank" class="social-btn telegram">
+                        <i class="fa-brands fa-telegram"></i> Join Telegram Channel
+                    </a>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <nav class="bottom-nav">
+        <div class="nav-item active" onclick="switchTab('homeTab', this)">
+            <i class="fa-solid fa-house"></i>
+            <span>Home</span>
+        </div>
+        <div class="nav-item" onclick="switchTab('aboutTab', this)">
+            <i class="fa-solid fa-circle-info"></i>
+            <span>About</span>
+        </div>
+    </nav>
+
+    <script>
+        /* Player URL is NEVER in HTML — only from /api/player with signed token */
+        const SHARE_MESSAGE = "🔥 *Gmax Playlist Hub - अनलिमिटेड HQ म्यूजिक!* 🎧\n\n'नाम तो सुना होगा!' 😉 सुनिए अपने पसंदीदा गाने बिना किसी रुकावट के बिल्कुल फ्री में।\n\n👇 *म्यूजिक प्लेयर प्ले करने के लिए लिंक:* \nhttps://songbygmax.vercel.app\n\n📢 *डेली नए गानों और अपडेट्स के लिए टेलीग्राम जॉइन करें:* \nhttps://t.me/+BQmDTgTQkJU3ODA1";
+
+        /* ========== 36h ROLLING PASSWORD + TOKEN-PROTECTED PLAYER URL ========== */
+        const UNLOCK_KEY = 'gmax_unlock_until';
+        const DEVICE_KEY = 'gmax_device_id';
+        const TOKEN_KEY = 'gmax_access_token';
+
+        let isUserPaused = false;
+        let unlockTick = null;
+        let playerLoadInFlight = false;
+
+        function getDeviceId() {
+            try {
+                let id = localStorage.getItem(DEVICE_KEY);
+                if (id && /^[A-Z0-9]{4,8}$/.test(id)) return id;
+                const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+                const rand = (window.crypto && crypto.getRandomValues)
+                    ? crypto.getRandomValues(new Uint8Array(6))
+                    : [1,2,3,4,5,6].map(() => Math.random() * 256 | 0);
+                id = '';
+                for (let i = 0; i < 6; i++) id += chars[rand[i] % chars.length];
+                localStorage.setItem(DEVICE_KEY, id);
+                return id;
+            } catch (e) { return 'DEVICE1'; }
+        }
+
+        function getUntil() {
+            try { return parseInt(localStorage.getItem(UNLOCK_KEY) || '0', 10) || 0; } catch (e) { return 0; }
+        }
+        function setUntil(t) {
+            try { localStorage.setItem(UNLOCK_KEY, String(t)); } catch (e) {}
+        }
+        function isUnlockedNow() {
+            return getUntil() > Date.now();
+        }
+        function fmtMs(ms) {
+            if (ms < 0) ms = 0;
+            const s = Math.floor(ms / 1000), h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60), sec = s % 60;
+            const p = n => (n < 10 ? '0' : '') + n;
+            return p(h) + ':' + p(m) + ':' + p(sec);
+        }
+
+        function clearPlayerFrame() {
+            const iframe = document.getElementById('musicPlayerIframe');
+            if (iframe) {
+                try { iframe.src = 'about:blank'; } catch (e) {}
+            }
+        }
+
+        function getAccessToken() {
+            try { return localStorage.getItem(TOKEN_KEY) || ''; } catch (e) { return ''; }
+        }
+        function setAccessToken(t) {
+            try {
+                if (t) localStorage.setItem(TOKEN_KEY, t);
+                else localStorage.removeItem(TOKEN_KEY);
+            } catch (e) {}
+        }
+
+        /* Load real player URL ONLY from API (token required). Never hardcode in HTML. */
+        function loadPlayerFromApi() {
+            if (!navigator.onLine) {
+                clearPlayerFrame();
+                return;
+            }
+            if (!isUnlockedNow()) {
+                clearPlayerFrame();
+                return;
+            }
+            const token = getAccessToken();
+            if (!token) {
+                clearPlayerFrame();
+                return;
+            }
+            if (playerLoadInFlight) return;
+            playerLoadInFlight = true;
+            fetch('/api/player', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ token: token, deviceId: getDeviceId() }),
+                cache: 'no-store'
+            })
+            .then(async r => {
+                const d = await r.json().catch(() => ({}));
+                if (!r.ok || !d || !d.ok || !d.url) {
+                    clearPlayerFrame();
+                    if (r.status === 401) {
+                        setAccessToken('');
+                        try { localStorage.removeItem(UNLOCK_KEY); } catch (e) {}
+                        applyUnlockState();
+                    }
+                    return;
+                }
+                const iframe = document.getElementById('musicPlayerIframe');
+                if (iframe && iframe.src !== d.url) {
+                    iframe.src = d.url;
+                }
+                try { initContinuousPlaylist(); } catch (e) {}
+            })
+            .catch(() => { clearPlayerFrame(); })
+            .finally(() => { playerLoadInFlight = false; });
+        }
+
+        function applyUnlockState() {
+            const until = getUntil();
+            const ok = until > Date.now();
+            const shareOverlay = document.getElementById('shareOverlay');
+            const timerChip = document.getElementById('timerChip');
+            const timerVal = document.getElementById('timerVal');
+
+            if (ok) {
+                if (shareOverlay) shareOverlay.style.display = 'none';
+                if (timerChip) timerChip.classList.add('show');
+                if (unlockTick) clearInterval(unlockTick);
+                const step = () => {
+                    const left = until - Date.now();
+                    if (left <= 0) {
+                        if (timerVal) timerVal.textContent = '00:00:00';
+                        if (timerChip) timerChip.classList.remove('show');
+                        try { localStorage.removeItem(UNLOCK_KEY); } catch (e) {}
+                        setAccessToken('');
+                        clearPlayerFrame();
+                        if (shareOverlay) shareOverlay.style.display = 'flex';
+                        if (unlockTick) clearInterval(unlockTick);
+                        return;
+                    }
+                    if (timerVal) timerVal.textContent = fmtMs(left);
+                };
+                step();
+                unlockTick = setInterval(step, 1000);
+                loadPlayerFromApi();
+            } else {
+                if (shareOverlay) shareOverlay.style.display = 'flex';
+                if (timerChip) timerChip.classList.remove('show');
+                setAccessToken('');
+                clearPlayerFrame();
+            }
+        }
+
+        function tryVerify() {
+            const pwInput = document.getElementById('pwInput');
+            const pwErr = document.getElementById('pwErr');
+            const pwSubmit = document.getElementById('pwSubmit');
+            const val = (pwInput && pwInput.value || '').trim().replace(/\s+/g, '');
+            if (!/^\d{12}$/.test(val)) {
+                if (pwErr) pwErr.textContent = '12-digit code enter karein.';
+                return;
+            }
+            if (pwSubmit) { pwSubmit.disabled = true; pwSubmit.textContent = 'Checking…'; }
+            if (pwErr) pwErr.textContent = '';
+            fetch('/api/verify', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ code: val, deviceId: getDeviceId() })
+            })
+            .then(async r => {
+                const text = await r.text();
+                let d = null;
+                try { d = JSON.parse(text); } catch (e) {}
+                if (!r.ok || !d) {
+                    if (pwErr) pwErr.textContent = r.status === 404
+                        ? 'API missing (404). api/ folder upload karke Redeploy karein.'
+                        : ('Server error ' + r.status);
+                    return;
+                }
+                if (d.ok && d.until) {
+                    setUntil(d.until);
+                    if (d.accessToken) setAccessToken(d.accessToken);
+                    applyUnlockState();
+                    if (pwInput) pwInput.value = '';
+                } else {
+                    if (pwErr) pwErr.textContent = d.error || 'Invalid code';
+                    if (pwInput) pwInput.value = '';
+                }
+            })
+            .catch(err => { if (pwErr) pwErr.textContent = 'Network error: ' + (err.message || ''); })
+            .finally(() => {
+                if (pwSubmit) { pwSubmit.disabled = false; pwSubmit.textContent = 'Verify'; }
+            });
+        }
+
+        function bindPasswordUI() {
+            const pwSubmit = document.getElementById('pwSubmit');
+            const pwInput = document.getElementById('pwInput');
+            const pwGetKey = document.getElementById('pwGetKeyBtn');
+            const pwErr = document.getElementById('pwErr');
+            if (pwSubmit) pwSubmit.onclick = tryVerify;
+            if (pwInput) pwInput.addEventListener('keydown', e => { if (e.key === 'Enter') tryVerify(); });
+            if (pwGetKey) {
+                pwGetKey.addEventListener('click', () => {
+                    pwGetKey.disabled = true;
+                    pwGetKey.textContent = 'Generating…';
+                    if (pwErr) pwErr.textContent = '';
+                    fetch('/api/get-key', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ deviceId: getDeviceId() })
+                    })
+                    .then(r => r.json())
+                    .then(data => {
+                        const url = data && (data.shortUrl || data.fallbackUrl);
+                        if (url) window.location.href = url;
+                        else {
+                            if (pwErr) pwErr.textContent = (data && data.error) || 'Key failed';
+                            pwGetKey.disabled = false;
+                            pwGetKey.textContent = '🔑 Get Key';
+                        }
+                    })
+                    .catch(() => {
+                        if (pwErr) pwErr.textContent = 'Connection error';
+                        pwGetKey.disabled = false;
+                        pwGetKey.textContent = '🔑 Get Key';
+                    });
+                });
+            }
+        }
+
+        function sendCommandToPlayer(action) {
+            const iframe = document.getElementById('musicPlayerIframe');
+            if (iframe && iframe.contentWindow) {
+                iframe.contentWindow.postMessage({ 
+                    type: action, 
+                    autoplay: true, 
+                    repeat: 'all',
+                    continuous: true 
+                }, '*');
+            }
+        }
+
+        function initContinuousPlaylist() {
+            if (isUserPaused) return;
+            if (!isUnlockedNow()) return;
+            sendCommandToPlayer('PLAY');
+            sendCommandToPlayer('SET_AUTOPLAY_ON');
+            sendCommandToPlayer('SET_REPEAT_ALL');
+        }
+
+        function closeTgPopup() {
+            try {
+                var m = document.getElementById('tgPopupModal');
+                if (m) {
+                    m.style.display = 'none';
+                    m.style.visibility = 'hidden';
+                }
+            } catch(e) {}
+            try { applyUnlockState(); } catch(e) {}
+            setTimeout(function() {
+                try {
+                    var wifiBtn = document.getElementById('wifiShareBtn');
+                    if (wifiBtn) wifiBtn.classList.add('show');
+                } catch(e) {}
+            }, 2000);
+            setTimeout(function() {
+                try {
+                    if (typeof showInstallPopup === 'function') {
+                        showInstallPopup();
+                    }
+                } catch(e) {}
+            }, 1600);
+        }
+
+        function triggerDirectWhatsAppShare() {
+            const waUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(SHARE_MESSAGE)}`;
+            window.open(waUrl, '_blank');
+        }
+
+        /* Message listener to sync with sidebar opening inside iframe */
+        window.addEventListener('message', function(event) {
+            if (event.data && event.data.type === 'SIDEBAR_STATE') {
+                const logoOverlay = document.getElementById('logoOverlay');
+                if (logoOverlay) {
+                    if (event.data.isOpen) {
+                        logoOverlay.style.display = 'none';
+                    } else {
+                        logoOverlay.style.display = 'flex';
+                    }
+                }
+            }
+        });
+
+        window.addEventListener('DOMContentLoaded', function() {
+            // Never set player URL from HTML — only via /api/player after unlock
+            clearPlayerFrame();
+
+            var tgModal = document.getElementById('tgPopupModal');
+            if (tgModal) tgModal.style.display = 'flex';
+
+            bindPasswordUI();
+            applyUnlockState();
+
+            // Offline / online protection
+            window.addEventListener('offline', function() {
+                clearPlayerFrame();
+            });
+            window.addEventListener('online', function() {
+                if (isUnlockedNow()) loadPlayerFromApi();
+            });
+            // Hide URL if tab hidden + offline edge cases
+            document.addEventListener('visibilitychange', function() {
+                if (document.hidden && !navigator.onLine) clearPlayerFrame();
+            });
+
+            document.body.addEventListener('click', function() {
+                isUserPaused = false;
+                initContinuousPlaylist();
+            }, { once: true });
+
+            var tgClose = document.querySelector('.tg-popup-close');
+            if (tgClose) {
+                tgClose.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    closeTgPopup();
+                });
+            }
+            var instClose = document.querySelector('.install-popup-close');
+            if (instClose) {
+                instClose.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    closeInstallPopup();
+                });
+            }
+        });
+
+        function switchTab(tabId, element) {
+            document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+            document.getElementById(tabId).classList.add('active');
+            element.classList.add('active');
+        }
+
+        /* ========== PWA INSTALL LOGIC & SERVICE WORKER ========== */
+        let deferredPrompt = null;
+        const pwaInstallBtn = document.getElementById('pwaInstallBtn');
+        const installPopup = document.getElementById('installPopupModal');
+        const installNowBtn = document.getElementById('installNowBtn');
+        const iosSteps = document.getElementById('iosInstallSteps');
+
+        function isStandalone() {
+            return window.matchMedia('(display-mode: standalone)').matches ||
+                   window.navigator.standalone === true ||
+                   document.referrer.includes('android-app://');
+        }
+
+        function isIOS() {
+            return /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+                   (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+        }
+
+        function closeInstallPopup() {
+            if (installPopup) {
+                installPopup.classList.remove('show');
+                localStorage.setItem('gmax_install_dismissed', Date.now().toString());
+            }
+        }
+
+        function showInstallPopup() {
+            if (isStandalone()) return;
+            const dismissed = localStorage.getItem('gmax_install_dismissed');
+            if (dismissed) {
+                const daysSince = (Date.now() - parseInt(dismissed, 10)) / (1000 * 60 * 60 * 24);
+                if (daysSince < 3) return;
+            }
+            if (installPopup) {
+                installPopup.classList.add('show');
+                if (isIOS()) {
+                    if (iosSteps) iosSteps.classList.add('show');
+                    if (installNowBtn) {
+                        installNowBtn.innerHTML = '<i class="fa-solid fa-share-nodes"></i> Share से Add to Home Screen';
+                        installNowBtn.onclick = function() {
+                            if (iosSteps) iosSteps.classList.add('show');
+                        };
+                    }
+                }
+            }
+        }
+
+        async function triggerInstall() {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                const { outcome } = await deferredPrompt.userChoice;
+                console.log('Install outcome:', outcome);
+                deferredPrompt = null;
+                if (pwaInstallBtn) pwaInstallBtn.style.display = 'none';
+                closeInstallPopup();
+                if (outcome === 'accepted') {
+                    localStorage.setItem('gmax_install_dismissed', Date.now().toString());
+                }
+            } else if (isIOS()) {
+                if (iosSteps) iosSteps.classList.add('show');
+            }
+        }
+
+        // Register Real Service Worker File
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('./sw.js')
+                .then(() => console.log('Service Worker Registered Successfully'))
+                .catch((err) => console.log('SW Registration Error:', err));
+        }
+
+        // Listen for BeforeInstallPrompt (Chrome/Edge/Android)
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            if (pwaInstallBtn) pwaInstallBtn.style.display = 'flex';
+            setTimeout(function() {
+                const tgModal = document.getElementById('tgPopupModal');
+                if (!tgModal || tgModal.style.display === 'none') {
+                    showInstallPopup();
+                }
+            }, 800);
+        });
+
+        // Header Install button
+        if (pwaInstallBtn) {
+            pwaInstallBtn.addEventListener('click', function() { triggerInstall(); });
+        }
+
+        // Hide UI if already installed
+        window.addEventListener('appinstalled', function() {
+            if (pwaInstallBtn) pwaInstallBtn.style.display = 'none';
+            closeInstallPopup();
+            console.log('App successfully installed!');
+        });
+
+        // Page load check
+        if (isStandalone()) {
+            if (pwaInstallBtn) pwaInstallBtn.style.display = 'none';
+        }
+    </script>
+</body>
+</html>
